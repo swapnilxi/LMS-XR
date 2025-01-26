@@ -2,7 +2,6 @@ package com.lms.lmsproject.LmsProject.service;
 
 import java.util.List;
 
-import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -81,12 +80,12 @@ public class PostService {
     }
     
 
-    public Post findPostById(ObjectId id) {
+    public Post findPostById(String id) {
         return postRepo.findById(id)
                 .orElseThrow(() -> new RuntimeException("Post not found"));
     }
 
-    public void deletePost(ObjectId postId) {
+    public void deletePost(String postId) {
 
         // Fetch the post by ID
         Post post = postRepo.findById(postId)

@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -133,7 +132,7 @@ public class TeacherService {
         return savedTeacher;
     }
 
-    public void deleteTeacher(ObjectId id) {
+    public void deleteTeacher(String id) {
         Teacher teacher = teacherRepo.findById(id)
                 .orElseThrow(() -> new UsernameNotFoundException("Teacher with ID " + id + " does not exist"));
 

@@ -1,6 +1,5 @@
 package com.lms.lmsproject.LmsProject.controllers;
 
-import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -49,7 +48,7 @@ public class PostController {
     }
 
     @GetMapping("/find-post/{id}")
-    public ResponseEntity<APIResponse<Post>> findPostById(@PathVariable ObjectId id) {
+    public ResponseEntity<APIResponse<Post>> findPostById(@PathVariable String id) {
         try {
             Post post = postService.findPostById(id);
             return new ResponseEntity<>(
@@ -75,7 +74,7 @@ public class PostController {
     }
 
     @DeleteMapping("/delete-post/{postId}")
-    public ResponseEntity<APIResponse<Void>> deletePost(@PathVariable ObjectId postId) {
+    public ResponseEntity<APIResponse<Void>> deletePost(@PathVariable String postId) {
         try {
 
             postService.deletePost(postId);

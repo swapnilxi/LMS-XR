@@ -3,8 +3,8 @@ package com.lms.lmsproject.LmsProject.service;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 
-import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -14,6 +14,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.lms.lmsproject.LmsProject.entity.Admin;
 import com.lms.lmsproject.LmsProject.entity.Role;
@@ -27,8 +28,6 @@ public class AdminService {
     private AdminRepo adminRepoService;
 
     private static final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-
-    private Admin loggedAdmin;
 
     @Autowired
     private UserDetailsServiceImpl userDetailsServiceImpl;
@@ -59,15 +58,13 @@ public class AdminService {
     }
 
     public Admin getAuthenticatedAdmin() {
-        if (loggedAdmin == null) {
-            String username = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal())
-                    .getUsername();
-            loggedAdmin = adminRepoService.findByAdminName(username).get();
-            if (loggedAdmin == null) {
-                throw new UsernameNotFoundException("User is Not Found !");
-            }
-        }
-        return loggedAdmin;
+        // Retrieve the currently authenticated user's username
+        String username = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal())
+                .getUsername();
+
+        // Fetch the admin details based on the username from the database
+        return adminRepoService.findByAdminName(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User is not found!"));
     }
 
     public List<Admin> getAllAdmins() {
@@ -93,6 +90,7 @@ public class AdminService {
         }
 
         Admin newAdmin = Admin.builder()
+                .adminId(UUID.randomUUID().toString())
                 .adminEmail(reqAdmin.getAdminEmail())
                 .adminName(reqAdmin.getAdminName())
                 .adminPassword(passwordEncoder.encode(reqAdmin.getAdminPassword()))
@@ -110,35 +108,47 @@ public class AdminService {
         }
     }
 
+    @Transactional
     public Admin updateAdmin(Admin reqAdmin) {
-        Admin authenticatedAdmin = getAuthenticatedAdmin(); // Get the currently logged-in admin
+        Admin authenticatedAdmin = getAuthenticatedAdmin(); // Get current admin
     
-        // Ensure that the admin is found and has a non-null ID
         if (authenticatedAdmin.getAdminId() == null) {
             throw new IllegalArgumentException("Authenticated Admin ID is null");
         }
     
-        // Proceed to update the admin
-        Admin updatedAdmin = Admin.builder()
-                .adminId(authenticatedAdmin.getAdminId()) // Make sure to set the ID
-                .adminEmail(reqAdmin.getAdminEmail())
-                .adminName(reqAdmin.getAdminName())
-                .adminPassword(passwordEncoder.encode(reqAdmin.getAdminPassword()))
-                .roles(Set.of(Role.ADMIN))
-                .build();
+        // Update only fields that are not null in reqAdmin
+        if (reqAdmin.getAdminEmail() != null) {
+            authenticatedAdmin.setAdminEmail(reqAdmin.getAdminEmail());
+        }
+        if (reqAdmin.getAdminName() != null) {
+            authenticatedAdmin.setAdminName(reqAdmin.getAdminName());
+        }
+        if (reqAdmin.getAdminPassword() != null && !reqAdmin.getAdminPassword().isEmpty()) {
+            authenticatedAdmin.setAdminPassword(passwordEncoder.encode(reqAdmin.getAdminPassword()));
+        }
     
-        return adminRepoService.save(updatedAdmin);
+        return adminRepoService.save(authenticatedAdmin);
     }
     
 
-    public void deleteAdminById(ObjectId id) {
-        Admin admin = adminRepoService.findById(id)
+    public void deleteAdminById() {
+
+        Admin admin = adminRepoService.findById(getAuthenticatedAdmin().getAdminId())
                 .orElseThrow(() -> new UsernameNotFoundException("Admin Not Found !"));
 
         // if (!admin.getAdminId().equals(getAuthenticatedAdmin().getAdminId())) {
-        //     throw new IllegalArgumentException("You are not authorized to delete this Admin");
+        // throw new IllegalArgumentException("You are not authorized to delete this
+        // Admin");
         // }
         adminRepoService.delete(admin);
+    }
+
+    public String findAdminByID() {
+
+        Admin admin = adminRepoService.findById(getAuthenticatedAdmin().getAdminId())
+                .orElseThrow(() -> new UsernameNotFoundException("Admin Not Found !"));
+
+        return admin.getAdminId();
     }
 
 }

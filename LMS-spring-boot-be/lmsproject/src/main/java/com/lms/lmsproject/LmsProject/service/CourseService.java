@@ -81,7 +81,8 @@ public class CourseService {
 
     public Course updateCourse(Course courseDetails) { // it requires course id as curz of multi courses
         // Fetch the course by ID
-        Course existingCourse = courseRepo.findById(courseDetails.getCourseId())
+        ObjectId objectId = new ObjectId(courseDetails.getCourseId());
+        Course existingCourse = courseRepo.findById(objectId)
                 .orElseThrow(() -> new IllegalArgumentException("Course not found"));
 
         // Get the authenticated (logged-in) teacher

@@ -2,7 +2,7 @@ package com.lms.lmsproject.LmsProject.controllers;
 
 import java.util.List;
 
-import org.bson.types.ObjectId;
+// import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -67,6 +67,20 @@ public class AdminController {
         }
     }
 
+    @GetMapping(path = "/find-admin-id")
+    ResponseEntity<APIResponse<String>> findAdminById() {
+        try {
+            String admin = adminService.findAdminByID();
+            return new ResponseEntity<>(new APIResponse<String>(HttpStatus.OK.value(), "Success", admin),
+                    HttpStatus.OK);
+        } catch (Exception UsernameNotFoundException) {
+            return new ResponseEntity<>(
+                    new APIResponse<String>(HttpStatus.NOT_FOUND.value(),
+                            UsernameNotFoundException.getMessage(), null),
+                    HttpStatus.OK);
+        }
+    }
+
     @PutMapping(path = "/update-admin")
     ResponseEntity<APIResponse<Admin>> updateAdmin(@RequestBody Admin admin) {
         try {
@@ -81,10 +95,10 @@ public class AdminController {
         }
     }
 
-    @DeleteMapping(path = "/delete-admin/{id}")
-    ResponseEntity<APIResponse<Void>> updateAdmin(@PathVariable ObjectId id) {
+    @DeleteMapping(path = "/delete-admin")
+    ResponseEntity<APIResponse<Void>> updateAdmin() {
         try {
-            adminService.deleteAdminById(id);
+            adminService.deleteAdminById();
             return new ResponseEntity<>(new APIResponse<>(HttpStatus.OK.value(), "Success", null),
                     HttpStatus.OK);
         } catch (Exception IllegalArgumentException) {

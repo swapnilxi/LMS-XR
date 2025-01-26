@@ -1,6 +1,6 @@
 package com.lms.lmsproject.LmsProject.entity;
 
-import org.bson.types.ObjectId;
+// import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -27,7 +27,7 @@ import lombok.NoArgsConstructor;
 public class Post {
 
     @Id
-    private ObjectId postId;
+    private String postId;
 
     // @Nonnull
     private String title;

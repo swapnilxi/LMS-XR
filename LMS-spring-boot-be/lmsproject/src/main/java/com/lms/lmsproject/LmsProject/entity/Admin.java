@@ -2,7 +2,7 @@ package com.lms.lmsproject.LmsProject.entity;
 
 import java.util.Set;
 
-import org.bson.types.ObjectId;
+// import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
@@ -20,11 +20,10 @@ import lombok.NoArgsConstructor;
 @Builder
 public class Admin {
 
-
     @Id
-    private ObjectId adminId;
+    private String adminId;
 
-     @Field("adminEmail")
+    @Field("adminEmail")
     private String adminEmail;
 
     @Field("adminName")

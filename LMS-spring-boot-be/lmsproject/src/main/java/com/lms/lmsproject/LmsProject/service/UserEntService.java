@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -111,7 +110,8 @@ public class UserEntService {
     }
 
     public UserEnt updateUser(UserEnt reqUser) {
-            UserEnt user = userEntRepo.findById(getAuthenticateUserEnt().getUserId()).orElseThrow(()-> new UsernameNotFoundException("User Id Not Valid"));
+
+            UserEnt user = userEntRepo.findById(reqUser.getUserId()).orElseThrow(()-> new UsernameNotFoundException("User Id Not Valid"));
             user.setFirstName(reqUser.getFirstName());
             user.setLastName(reqUser.getLastName());
             user.setUserName(reqUser.getUserName());
@@ -121,26 +121,13 @@ public class UserEntService {
             }else{
             }
             user.setRoles(Set.of(Role.USER));
-        // UserEnt updatedUser = UserEnt.builder()
-        //         .userId(getAuthenticateUserEnt().getUserId())
-        //         .firstName(reqUser.getFirstName())
-        //         .lastName(reqUser.getLastName())
-        //         .userName(reqUser.getUserName())
-        //         .userEmail(reqUser.getUserEmail())
-        //         .userPassword(passwordEncoder.encode(reqUser.getUserPassword()))
-        //         .roles(Set.of(Role.USER))
-        //         .build();
         return userEntRepo.save(user);
 
     }
 
-    public void deleteUser(ObjectId id) {
+    public void deleteUser(String id) {
         UserEnt user = userEntRepo.findById(id)
                 .orElseThrow(() -> new UsernameNotFoundException("User Id Not Found!"));
-
-        // if (!user.getUserId().equals(getAuthenticateUserEnt().getUserId())) {
-        // throw new RuntimeException("You are not authorized to delete this user");
-        // }
         userEntRepo.delete(user);
     }
 }

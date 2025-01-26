@@ -2,7 +2,6 @@ package com.lms.lmsproject.LmsProject.controllers;
 
 import java.util.List;
 
-import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -80,7 +79,7 @@ public class UserController {
     }
 
     @DeleteMapping(path = "/delete-user/{id}")
-    public ResponseEntity<APIResponse<Void>> deleteUserByUserId(@PathVariable ObjectId id) {
+    public ResponseEntity<APIResponse<Void>> deleteUserByUserId(@PathVariable String id) {
         try {
             userEntService.deleteUser(id);
             return new ResponseEntity<>(new APIResponse<>(HttpStatus.NO_CONTENT.value(), "Success", null),

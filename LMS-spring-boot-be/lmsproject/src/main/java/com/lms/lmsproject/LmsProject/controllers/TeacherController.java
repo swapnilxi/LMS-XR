@@ -2,7 +2,6 @@ package com.lms.lmsproject.LmsProject.controllers;
 
 import java.util.List;
 
-import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -77,7 +76,7 @@ public class TeacherController {
     }
 
     @DeleteMapping(path = "/delete-teacher/{id}")
-    public ResponseEntity<APIResponse<Void>> deleteUserByUserId(@PathVariable ObjectId id) {
+    public ResponseEntity<APIResponse<Void>> deleteUserByUserId(@PathVariable String id) {
         try {
             teacherService.deleteTeacher(id);
             return new ResponseEntity<>(
