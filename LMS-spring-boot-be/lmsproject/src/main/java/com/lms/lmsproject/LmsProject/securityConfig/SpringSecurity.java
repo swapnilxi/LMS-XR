@@ -44,8 +44,8 @@ public class SpringSecurity {
                                 "/swagger-ui/**",
                                 "/swagger-ui.html")
                         .permitAll()
-                        .requestMatchers("/user/**").hasAnyRole("USER", "ADMIN")
-                        .requestMatchers("/teacher/**").hasAnyRole("TEACHER", "ADMIN")
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/user/**").hasAnyRole("USER","ADMIN")
                         .requestMatchers("/teacher/**").hasAnyRole("TEACHER", "ADMIN")
                         .requestMatchers("/post/**").hasAnyRole("TEACHER", "ADMIN")
                         .requestMatchers("/course/**").hasAnyRole("TEACHER", "ADMIN")

@@ -8,7 +8,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
-import jakarta.annotation.Nonnull;
+// import jakarta.annotation.Nonnull;
 // import jakarta.persistence.Column;
 // import jakarta.persistence.ElementCollection;
 // import jakarta.persistence.Entity;
@@ -34,21 +34,16 @@ public class UserEnt {
     @Id
     private ObjectId userId;
 
-    @Nonnull
     private String firstName;
 
-    @Nonnull
     private String lastName;
 
     @Field("userName")
-    @Nonnull
     private String userName;
 
     @Field("userEmail")
-    @Nonnull
     private String userEmail;
 
-    @Nonnull
     private String userPassword;
 
     

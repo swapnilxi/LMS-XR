@@ -111,17 +111,26 @@ public class UserEntService {
     }
 
     public UserEnt updateUser(UserEnt reqUser) {
-
-        UserEnt updatedUser = UserEnt.builder()
-                .userId(getAuthenticateUserEnt().getUserId())
-                .firstName(reqUser.getFirstName())
-                .lastName(reqUser.getLastName())
-                .userName(reqUser.getUserName())
-                .userEmail(reqUser.getUserEmail())
-                .userPassword(passwordEncoder.encode(reqUser.getUserPassword()))
-                .roles(Set.of(Role.USER))
-                .build();
-        return userEntRepo.save(updatedUser);
+            UserEnt user = userEntRepo.findById(getAuthenticateUserEnt().getUserId()).orElseThrow(()-> new UsernameNotFoundException("User Id Not Valid"));
+            user.setFirstName(reqUser.getFirstName());
+            user.setLastName(reqUser.getLastName());
+            user.setUserName(reqUser.getUserName());
+            user.setUserEmail(reqUser.getUserEmail());
+            if(reqUser.getUserPassword() != null){
+                user.setUserPassword(passwordEncoder.encode(reqUser.getUserPassword()));
+            }else{
+            }
+            user.setRoles(Set.of(Role.USER));
+        // UserEnt updatedUser = UserEnt.builder()
+        //         .userId(getAuthenticateUserEnt().getUserId())
+        //         .firstName(reqUser.getFirstName())
+        //         .lastName(reqUser.getLastName())
+        //         .userName(reqUser.getUserName())
+        //         .userEmail(reqUser.getUserEmail())
+        //         .userPassword(passwordEncoder.encode(reqUser.getUserPassword()))
+        //         .roles(Set.of(Role.USER))
+        //         .build();
+        return userEntRepo.save(user);
 
     }
 
