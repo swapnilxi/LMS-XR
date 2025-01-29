@@ -67,7 +67,6 @@ public class UserEntService {
             }
         }
         return loggedInUser;
-
     }
 
     public List<UserEnt> getAllUsers() {
@@ -98,6 +97,16 @@ public class UserEntService {
         if (requestUser.getUserPassword() == null || requestUser.getUserPassword().trim().isEmpty()) {
             throw new IllegalArgumentException("User Password can Not be Null");
         }
+
+        Optional<UserEnt> existingUserEmail = userEntRepo.findByUserEmail(requestUser.getUserEmail());
+        Optional<UserEnt> existingUserName = userEntRepo.findByUserName(requestUser.getUserName());
+        if (existingUserEmail.isPresent()) {
+            throw new IllegalArgumentException("User with this email is already registered");
+        }
+        if (existingUserName.isPresent()) {
+            throw new IllegalArgumentException("Username is already used");
+        }
+
         UserEnt user = UserEnt.builder()
                 .firstName(requestUser.getFirstName())
                 .lastName(requestUser.getLastName())
@@ -111,23 +120,35 @@ public class UserEntService {
 
     public UserEnt updateUser(UserEnt reqUser) {
 
-            UserEnt user = userEntRepo.findById(reqUser.getUserId()).orElseThrow(()-> new UsernameNotFoundException("User Id Not Valid"));
-            user.setFirstName(reqUser.getFirstName());
-            user.setLastName(reqUser.getLastName());
-            user.setUserName(reqUser.getUserName());
-            user.setUserEmail(reqUser.getUserEmail());
-            if(reqUser.getUserPassword() != null){
-                user.setUserPassword(passwordEncoder.encode(reqUser.getUserPassword()));
-            }else{
-            }
-            user.setRoles(Set.of(Role.USER));
-        return userEntRepo.save(user);
+        UserEnt exestingUser = userEntRepo.findById(getAuthenticateUserEnt().getUserId())
+                .orElseThrow(() -> new UsernameNotFoundException("User Id Not Valid"));
 
+        if (reqUser.getFirstName() != null) {
+            exestingUser.setFirstName(reqUser.getFirstName());
+        }
+        if (reqUser.getLastName() != null) {
+            exestingUser.setLastName(reqUser.getLastName());
+        }
+        if (reqUser.getUserName() != null) {
+            exestingUser.setUserName(reqUser.getUserName());
+        }
+        if (reqUser.getUserEmail() != null) {
+            exestingUser.setUserEmail(reqUser.getUserEmail());
+        }
+        if (reqUser.getUserPassword() != null) {
+            exestingUser.setUserPassword(passwordEncoder.encode(reqUser.getUserPassword()));
+        }
+
+        return userEntRepo.save(exestingUser);
     }
 
-    public void deleteUser(String id) {
-        UserEnt user = userEntRepo.findById(id)
+    public void deleteUser() {
+        UserEnt user = userEntRepo.findById(getAuthenticateUserEnt().getUserId())
                 .orElseThrow(() -> new UsernameNotFoundException("User Id Not Found!"));
+
+        if (!user.getUserId().equals(getAuthenticateUserEnt().getUserId())) {
+            throw new IllegalArgumentException("You can only delete your own profile");
+        }
         userEntRepo.delete(user);
     }
 }

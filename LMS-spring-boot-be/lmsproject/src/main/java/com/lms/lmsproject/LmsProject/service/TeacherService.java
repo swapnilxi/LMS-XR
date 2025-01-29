@@ -3,6 +3,7 @@ package com.lms.lmsproject.LmsProject.service;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -13,6 +14,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.lms.lmsproject.LmsProject.entity.Role;
 import com.lms.lmsproject.LmsProject.entity.Teacher;
@@ -25,7 +27,7 @@ public class TeacherService {
     @Autowired
     private TeacherRepo teacherRepo;
 
-    private Teacher loggedInTeacher;
+    private Teacher cachedTeacher;
 
     private static final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
@@ -59,21 +61,22 @@ public class TeacherService {
     }
 
     public Teacher getAuthenticatedTeacher() {
-        if (loggedInTeacher == null) {
+        if (cachedTeacher == null) {
             String username = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal())
                     .getUsername();
-            loggedInTeacher = teacherRepo.findByTeacherUsername(username).get();
-            if (loggedInTeacher == null) {
+            cachedTeacher = teacherRepo.findByTeacherUsername(username).get();
+            if (cachedTeacher == null) {
                 throw new UsernameNotFoundException("User Not Found");
             }
         }
-        return loggedInTeacher;
+        return cachedTeacher;
     }
 
     public List<Teacher> fetchAllTeachers() {
         return teacherRepo.findAll();
     }
 
+    @Transactional
     public Teacher createNewTeacher(Teacher reqTeacher) {
 
         if (reqTeacher.getTeacherUsername() == null || reqTeacher.getTeacherUsername().trim().isEmpty()) {
@@ -89,7 +92,17 @@ public class TeacherService {
             throw new IllegalArgumentException("Teacher Expertise cannot be null");
         }
 
+        Optional<Teacher> existingTeacherEmail = teacherRepo.findByTeacherEmail(reqTeacher.getTeacherEmail());
+        Optional<Teacher> existingTeacherUserName = teacherRepo.findByTeacherUsername(reqTeacher.getTeacherUsername());
+        if (existingTeacherEmail.isPresent()) {
+            throw new IllegalArgumentException("Teacher with this email is already registered");
+        }
+        if (existingTeacherUserName.isPresent()) {
+            throw new IllegalArgumentException("Teacher Username is already used");
+        }
+
         Teacher newTeacher = Teacher.builder()
+        .teacherId(UUID.randomUUID().toString())
                 .teacherUsername(reqTeacher.getTeacherUsername())
                 .teacherEmail(reqTeacher.getTeacherEmail())
                 .teacherPassword(passwordEncoder.encode(reqTeacher.getTeacherPassword())) // Avoid double setting
@@ -111,35 +124,39 @@ public class TeacherService {
     public Teacher updateTeacher(Teacher reqTeacher) {
 
         // Get the current authenticated teacher
-        Teacher currentTeacher = getAuthenticatedTeacher();
+        Teacher exestingTeacher = getAuthenticatedTeacher();
 
-        // Build the updated teacher object
-        Teacher updatedTeacher = Teacher.builder()
-                .teacherId(currentTeacher.getTeacherId()) // Keep the current teacher ID
-                .teacherUsername(reqTeacher.getTeacherUsername())
-                .teacherEmail(reqTeacher.getTeacherEmail())
-                .teacherPassword(passwordEncoder.encode(reqTeacher.getTeacherPassword())) // Re-encode the password
-                .expertise(reqTeacher.getExpertise())
-                .roles(Set.of(Role.TEACHER)) // Assuming the role stays the same
-                .build();
+        if (reqTeacher.getTeacherUsername() != null) {
+            exestingTeacher.setTeacherUsername(reqTeacher.getTeacherUsername());
+        }
+        if (reqTeacher.getTeacherEmail() != null) {
+            exestingTeacher.setTeacherEmail(reqTeacher.getTeacherEmail());
+        }
+
+        if (reqTeacher.getTeacherPassword() != null) {
+            exestingTeacher.setTeacherPassword(passwordEncoder.encode(reqTeacher.getTeacherPassword()));
+        }
+
+        if (reqTeacher.getExpertise() != null) {
+            exestingTeacher.setExpertise(reqTeacher.getExpertise());
+        }
 
         // Save the updated teacher
-        Teacher savedTeacher = teacherRepo.save(updatedTeacher);
+        Teacher saveTeacher = teacherRepo.save(exestingTeacher);
 
         // Invalidate the cached loggedInTeacher
-        loggedInTeacher = null;
+        cachedTeacher = null;
 
-        return savedTeacher;
+        return saveTeacher;
     }
 
-    public void deleteTeacher(String id) {
-        Teacher teacher = teacherRepo.findById(id)
-                .orElseThrow(() -> new UsernameNotFoundException("Teacher with ID " + id + " does not exist"));
+    public void deleteTeacher() {
+        Teacher teacher = teacherRepo.findById(getAuthenticatedTeacher().getTeacherId())
+                .orElseThrow(() -> new UsernameNotFoundException("Teacher ID does not exist"));
 
-        // if (!teacher.getTeacherId().equals(getAuthenticatedTeacher().getTeacherId()))
-        // {
-        // throw new IllegalArgumentException("You can only delete your own profile");
-        // }
+        if (!teacher.getTeacherId().equals(getAuthenticatedTeacher().getTeacherId())) {
+            throw new IllegalArgumentException("You can only delete your own profile");
+        }
 
         teacherRepo.delete(teacher);
     }

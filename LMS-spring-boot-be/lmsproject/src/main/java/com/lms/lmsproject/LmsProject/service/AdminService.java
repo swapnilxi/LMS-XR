@@ -71,22 +71,27 @@ public class AdminService {
         return adminRepoService.findAll();
     }
 
+    @Transactional
     public Admin createNewAdmin(Admin reqAdmin) {
 
         if (reqAdmin.getAdminName() == null || reqAdmin.getAdminName().trim().isEmpty()) {
-            throw new IllegalArgumentException("UserName can Not be Null");
+            throw new IllegalArgumentException("Admin name can Not be Null");
         }
         if (reqAdmin.getAdminEmail() == null || reqAdmin.getAdminEmail().trim().isEmpty()) {
-            throw new IllegalArgumentException("User Email can Not be Null");
+            throw new IllegalArgumentException("Admin Email can Not be Null");
         }
         if (reqAdmin.getAdminPassword() == null || reqAdmin.getAdminPassword().trim().isEmpty()) {
-            throw new IllegalArgumentException("User Password can Not be Null");
+            throw new IllegalArgumentException("Admin Password can Not be Null");
         }
 
         // Check if the adminEmail is already registered
-        Optional<Admin> existingAdmin = adminRepoService.findByAdminEmail(reqAdmin.getAdminEmail());
-        if (existingAdmin.isPresent()) {
+        Optional<Admin> existingAdminEmail = adminRepoService.findByAdminEmail(reqAdmin.getAdminEmail());
+        Optional<Admin> existingAdminUserName = adminRepoService.findByAdminName(reqAdmin.getAdminName());
+        if (existingAdminEmail.isPresent()) {
             throw new IllegalArgumentException("Admin with this email is already registered");
+        }
+        if (existingAdminUserName.isPresent()) {
+            throw new IllegalArgumentException("Admin Username is already used");
         }
 
         Admin newAdmin = Admin.builder()
@@ -111,11 +116,11 @@ public class AdminService {
     @Transactional
     public Admin updateAdmin(Admin reqAdmin) {
         Admin authenticatedAdmin = getAuthenticatedAdmin(); // Get current admin
-    
+
         if (authenticatedAdmin.getAdminId() == null) {
             throw new IllegalArgumentException("Authenticated Admin ID is null");
         }
-    
+
         // Update only fields that are not null in reqAdmin
         if (reqAdmin.getAdminEmail() != null) {
             authenticatedAdmin.setAdminEmail(reqAdmin.getAdminEmail());
@@ -126,20 +131,18 @@ public class AdminService {
         if (reqAdmin.getAdminPassword() != null && !reqAdmin.getAdminPassword().isEmpty()) {
             authenticatedAdmin.setAdminPassword(passwordEncoder.encode(reqAdmin.getAdminPassword()));
         }
-    
+
         return adminRepoService.save(authenticatedAdmin);
     }
-    
 
     public void deleteAdminById() {
 
         Admin admin = adminRepoService.findById(getAuthenticatedAdmin().getAdminId())
                 .orElseThrow(() -> new UsernameNotFoundException("Admin Not Found !"));
 
-        // if (!admin.getAdminId().equals(getAuthenticatedAdmin().getAdminId())) {
-        // throw new IllegalArgumentException("You are not authorized to delete this
-        // Admin");
-        // }
+        if (!admin.getAdminId().equals(getAuthenticatedAdmin().getAdminId())) {
+        throw new IllegalArgumentException("You are not authorized to delete this Admin");
+        }
         adminRepoService.delete(admin);
     }
 
@@ -147,6 +150,10 @@ public class AdminService {
 
         Admin admin = adminRepoService.findById(getAuthenticatedAdmin().getAdminId())
                 .orElseThrow(() -> new UsernameNotFoundException("Admin Not Found !"));
+
+        if (!admin.getAdminId().equals(getAuthenticatedAdmin().getAdminId())) {
+            throw new IllegalArgumentException("You can only delete your own profile");
+        }
 
         return admin.getAdminId();
     }

@@ -67,14 +67,16 @@ public class PostService {
         Post existingPost = postRepo.findById(post.getPostId())
                 .orElseThrow(() -> new IllegalArgumentException("Post not found"));
     
-      
         Teacher authenticatedUser = getAuthenticatedTeacher(); 
         if (!existingPost.getTeacher().getTeacherId().equals(authenticatedUser.getTeacherId())) {
             throw new IllegalArgumentException("You are not authorized to update this post");
         }
-    
-        existingPost.setTitle(post.getTitle());
-        existingPost.setContent(post.getContent());
+        if (post.getTitle() != null) {
+            existingPost.setTitle(post.getTitle());
+        }
+        if (post.getContent() != null) {
+            existingPost.setContent(post.getContent());
+        }
     
         return postRepo.save(existingPost);
     }

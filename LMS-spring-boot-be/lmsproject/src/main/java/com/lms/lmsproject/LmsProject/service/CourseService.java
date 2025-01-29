@@ -2,7 +2,6 @@ package com.lms.lmsproject.LmsProject.service;
 
 import java.util.List;
 
-import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -81,8 +80,8 @@ public class CourseService {
 
     public Course updateCourse(Course courseDetails) { // it requires course id as curz of multi courses
         // Fetch the course by ID
-        ObjectId objectId = new ObjectId(courseDetails.getCourseId());
-        Course existingCourse = courseRepo.findById(objectId)
+
+        Course existingCourse = courseRepo.findById(courseDetails.getCourseId())
                 .orElseThrow(() -> new IllegalArgumentException("Course not found"));
 
         // Get the authenticated (logged-in) teacher
@@ -94,15 +93,23 @@ public class CourseService {
         }
 
         // Update course details if the teacher owns the course
-        existingCourse.setCourseTitle(courseDetails.getCourseTitle());
-        existingCourse.setCourseDescription(courseDetails.getCourseDescription());
-        existingCourse.setCourseUrl(courseDetails.getCourseUrl());
-        existingCourse.setDuration(courseDetails.getDuration());
+        if (courseDetails.getCourseTitle() != null) {
+            existingCourse.setCourseTitle(courseDetails.getCourseTitle());
+        }
+        if (courseDetails.getCourseDescription() != null) {
+            existingCourse.setCourseDescription(courseDetails.getCourseDescription());
+        }
+        if (courseDetails.getCourseUrl() != null) {
+            existingCourse.setCourseUrl(courseDetails.getCourseUrl());
+        }
+        if (courseDetails.getDuration() != null) {
+            existingCourse.setDuration(courseDetails.getDuration());
+        }
 
         return courseRepo.save(existingCourse);
     }
 
-    public void deleteCourse(ObjectId courseId) {
+    public void deleteCourse(String courseId) {
         // Get the course by ID
         Course course = courseRepo.findById(courseId)
                 .orElseThrow(() -> new IllegalArgumentException("Course not found"));

@@ -75,10 +75,10 @@ public class TeacherController {
         }
     }
 
-    @DeleteMapping(path = "/delete-teacher/{id}")
-    public ResponseEntity<APIResponse<Void>> deleteUserByUserId(@PathVariable String id) {
+    @DeleteMapping(path = "/delete-teacher")
+    public ResponseEntity<APIResponse<Void>> deleteUserByUserId() {
         try {
-            teacherService.deleteTeacher(id);
+            teacherService.deleteTeacher();
             return new ResponseEntity<>(
                     new APIResponse<>(HttpStatus.NO_CONTENT.value(), "Teacher deleted successfully", null),
                     HttpStatus.OK);

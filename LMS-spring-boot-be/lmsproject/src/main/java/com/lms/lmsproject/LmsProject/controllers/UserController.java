@@ -78,10 +78,10 @@ public class UserController {
         }
     }
 
-    @DeleteMapping(path = "/delete-user/{id}")
-    public ResponseEntity<APIResponse<Void>> deleteUserByUserId(@PathVariable String id) {
+    @DeleteMapping(path = "/delete-user")
+    public ResponseEntity<APIResponse<Void>> deleteUserByUserId() {
         try {
-            userEntService.deleteUser(id);
+            userEntService.deleteUser();
             return new ResponseEntity<>(new APIResponse<>(HttpStatus.NO_CONTENT.value(), "Success", null),
                     HttpStatus.OK);
         } catch (Exception RuntimeException) {
