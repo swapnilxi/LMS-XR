@@ -3,11 +3,9 @@ package com.lms.lmsproject.LmsProject.entity;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.mongodb.core.mapping.Field;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-
-import jakarta.annotation.Nonnull;
+import com.mongodb.lang.NonNull;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -19,29 +17,23 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Course {
+public class Post {
 
     @Id
-    private String courseId;
+    private String postId;
 
-    @Nonnull
-    private String courseTitle;
+    @NonNull
+    private String title;
 
-      @Field("courseDescription")
-    @Nonnull
-    private String courseDescription;
+    @NonNull
+    private String content;
+
+    private PostEnu catagories;
 
     @DBRef
     @JsonIgnore
-    private Teacher teacher; // Reference to the teacher who created or manages the course
+    private Teacher teacher; // Reference to the Teacher entity
 
     private String teacherName;
-
-    @Nonnull
-    private String  courseUrl;
-
-    // sub sections to add
-    @Nonnull
-    private String duration; // Duration in hours or minutes
 
 }

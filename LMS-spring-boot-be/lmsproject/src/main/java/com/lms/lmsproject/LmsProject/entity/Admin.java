@@ -1,18 +1,18 @@
 package com.lms.lmsproject.LmsProject.entity;
 
-import java.util.List;
+import java.util.Set;
+
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 
 import jakarta.annotation.Nonnull;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Entity
+@Document
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -20,16 +20,16 @@ import lombok.NoArgsConstructor;
 public class Admin {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long adminId;
+    private String adminId;
 
-    private String adminName;
-    
+    @Field("adminEmail")
     private String adminEmail;
+
+    @Field("adminName")
+    private String adminName;
 
     @Nonnull
     private String adminPassword;
 
-    @Nonnull
-    private List<String> role;
+    private Set<Role> roles;
 }

@@ -1,14 +1,17 @@
 package com.lms.lmsproject.LmsProject.repository;
 
-import org.springframework.data.jpa.repository.JpaRepository;
+import java.util.Optional;
+
+import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
 import com.lms.lmsproject.LmsProject.entity.UserEnt;
 
 @Repository
-public interface UserEntRepo extends JpaRepository<UserEnt, Long> {
+public interface UserEntRepo extends MongoRepository<UserEnt, String> {
 
-    UserEnt findByUserEmail(String userEmail);
-    UserEnt findByUserName(String userName);
-    
+    Optional<UserEnt> findByUserEmail(String userEmail);
+
+    Optional<UserEnt> findByUserName(String userName);
+
 }

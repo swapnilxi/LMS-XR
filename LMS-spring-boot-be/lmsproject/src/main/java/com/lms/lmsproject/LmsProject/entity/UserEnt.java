@@ -1,19 +1,17 @@
 package com.lms.lmsproject.LmsProject.entity;
 
-import java.util.List;
 
-import jakarta.annotation.Nonnull;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import java.util.Set;
+
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Entity
+@Document
 @Data
 @Builder
 @NoArgsConstructor
@@ -21,17 +19,20 @@ import lombok.NoArgsConstructor;
 public class UserEnt {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long userId;
+    private String userId;
 
-    @Column(unique = true)
+    private String firstName;
+
+    private String lastName;
+
+    @Field("userName")
     private String userName;
 
-    @Column(unique = true)
+    @Field("userEmail")
     private String userEmail;
 
-    @Nonnull
     private String userPassword;
 
-    private List<String> roles;
+    
+    private Set<Role> roles;
 }
