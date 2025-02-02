@@ -2,7 +2,6 @@ package com.lms.lmsproject.LmsProject.entity;
 
 import java.util.Set;
 
-// import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
@@ -32,7 +31,5 @@ public class Admin {
     @Nonnull
     private String adminPassword;
 
-    // @ElementCollection(fetch = FetchType.EAGER)
-    // @Enumerated(EnumType.STRING)
     private Set<Role> roles;
 }

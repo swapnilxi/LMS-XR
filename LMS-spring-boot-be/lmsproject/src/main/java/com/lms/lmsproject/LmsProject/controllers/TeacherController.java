@@ -83,7 +83,8 @@ public class TeacherController {
                     new APIResponse<>(HttpStatus.NO_CONTENT.value(), "Teacher deleted successfully", null),
                     HttpStatus.OK);
 
-        } catch (UsernameNotFoundException e) {
+        } 
+        catch (UsernameNotFoundException e) {
             return new ResponseEntity<>(new APIResponse<>(HttpStatus.NOT_FOUND.value(), e.getMessage(), null),
                     HttpStatus.OK);
 
@@ -91,7 +92,8 @@ public class TeacherController {
             return new ResponseEntity<>(new APIResponse<>(HttpStatus.FORBIDDEN.value(), e.getMessage(), null),
                     HttpStatus.OK);
 
-        } catch (Exception e) {
+        } 
+        catch (Exception e) {
             return new ResponseEntity<>(
                     new APIResponse<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), "An error occurred", null),
                     HttpStatus.OK);

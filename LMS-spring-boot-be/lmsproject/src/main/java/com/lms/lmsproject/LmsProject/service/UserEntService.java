@@ -3,6 +3,7 @@ package com.lms.lmsproject.LmsProject.service;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -13,6 +14,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.lms.lmsproject.LmsProject.entity.Role;
 import com.lms.lmsproject.LmsProject.entity.UserEnt;
@@ -24,8 +26,6 @@ public class UserEntService {
 
     @Autowired
     private UserEntRepo userEntRepo;
-
-    private UserEnt loggedInUser;
 
     @Autowired
     private UserDetailsServiceImpl userDetailsServiceImpl;
@@ -58,15 +58,11 @@ public class UserEntService {
     }
 
     public UserEnt getAuthenticateUserEnt() {
-        if (loggedInUser == null) {
-            String username = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal())
-                    .getUsername();
-            loggedInUser = userEntRepo.findByUserName(username).get();
-            if (loggedInUser == null) {
-                throw new UsernameNotFoundException("User is Not Found !");
-            }
-        }
-        return loggedInUser;
+        String username = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal())
+                .getUsername();
+
+        return userEntRepo.findByUserName(username)
+                .orElseThrow(() -> new UsernameNotFoundException("Teacher not found !"));
     }
 
     public List<UserEnt> getAllUsers() {
@@ -81,6 +77,7 @@ public class UserEntService {
         }
     }
 
+    @Transactional
     public UserEnt createNewUser(UserEnt requestUser) {
         if (requestUser.getFirstName() == null || requestUser.getFirstName().trim().isEmpty()) {
             throw new IllegalArgumentException("First Name can Not be Null");
@@ -108,6 +105,7 @@ public class UserEntService {
         }
 
         UserEnt user = UserEnt.builder()
+                .userId(UUID.randomUUID().toString())
                 .firstName(requestUser.getFirstName())
                 .lastName(requestUser.getLastName())
                 .userName(requestUser.getUserName())
@@ -118,6 +116,7 @@ public class UserEntService {
         return userEntRepo.save(user);
     }
 
+    @Transactional
     public UserEnt updateUser(UserEnt reqUser) {
 
         UserEnt exestingUser = userEntRepo.findById(getAuthenticateUserEnt().getUserId())

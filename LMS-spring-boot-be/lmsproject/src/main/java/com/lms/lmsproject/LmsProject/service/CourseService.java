@@ -1,12 +1,14 @@
 package com.lms.lmsproject.LmsProject.service;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.lms.lmsproject.LmsProject.entity.Course;
 import com.lms.lmsproject.LmsProject.entity.Teacher;
@@ -22,26 +24,20 @@ public class CourseService {
     @Autowired
     private TeacherRepo teacherRepo;
 
-    private Teacher cachedTeacher;
-
     private Teacher getAuthenticatedTeacher() {
-        if (cachedTeacher == null) {
-            // Get the logged-in teacher's username
-            String username = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal())
-                    .getUsername();
-            // Fetch the teacher from the database
-            cachedTeacher = teacherRepo.findByTeacherUsername(username).get();
-            if (cachedTeacher == null) {
-                throw new UsernameNotFoundException("Teacher not found");
-            }
-        }
-        return cachedTeacher;
+
+        String username = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal())
+                .getUsername();
+
+        return teacherRepo.findByTeacherUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("Teacher not found !"));
     }
 
     public List<Course> getAllCourses() {
         return courseRepo.findAll();
     }
 
+    @Transactional
     public Course createNewCourse(Course course) {
 
         if (course.getCourseTitle() == null || course.getCourseTitle().trim().isEmpty()) {
@@ -58,6 +54,7 @@ public class CourseService {
         }
 
         Course newCourse = Course.builder()
+                .courseId(UUID.randomUUID().toString())
                 .courseTitle(course.getCourseTitle())
                 .courseDescription(course.getCourseDescription())
                 .teacher(getAuthenticatedTeacher())
@@ -78,14 +75,13 @@ public class CourseService {
         }
     }
 
+    @Transactional
     public Course updateCourse(Course courseDetails) { // it requires course id as curz of multi courses
-        // Fetch the course by ID
+
+        Teacher authenticatedTeacher = getAuthenticatedTeacher();
 
         Course existingCourse = courseRepo.findById(courseDetails.getCourseId())
                 .orElseThrow(() -> new IllegalArgumentException("Course not found"));
-
-        // Get the authenticated (logged-in) teacher
-        Teacher authenticatedTeacher = getAuthenticatedTeacher();
 
         // Check if the course belongs to the logged-in teacher
         if (!existingCourse.getTeacher().getTeacherId().equals(authenticatedTeacher.getTeacherId())) {
@@ -110,12 +106,12 @@ public class CourseService {
     }
 
     public void deleteCourse(String courseId) {
+        // Get the authenticated (logged-in) teacher
+        Teacher authenticatedTeacher = getAuthenticatedTeacher();
+
         // Get the course by ID
         Course course = courseRepo.findById(courseId)
                 .orElseThrow(() -> new IllegalArgumentException("Course not found"));
-
-        // Get the authenticated (logged-in) teacher
-        Teacher authenticatedTeacher = getAuthenticatedTeacher();
 
         // Check if the authenticated teacher is the owner of the course
         if (!course.getTeacher().getTeacherId().equals(authenticatedTeacher.getTeacherId())) {

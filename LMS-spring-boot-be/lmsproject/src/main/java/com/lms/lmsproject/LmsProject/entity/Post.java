@@ -1,19 +1,12 @@
 package com.lms.lmsproject.LmsProject.entity;
 
-// import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.mongodb.lang.NonNull;
 
-// import jakarta.persistence.Entity;
-// import jakarta.persistence.EnumType;
-// import jakarta.persistence.Enumerated;
-// import jakarta.persistence.GeneratedValue;
-// import jakarta.persistence.GenerationType;
-// import jakarta.persistence.Id;
-// import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -29,10 +22,10 @@ public class Post {
     @Id
     private String postId;
 
-    // @Nonnull
+    @NonNull
     private String title;
 
-    // @Nonnull
+    @NonNull
     private String content;
 
     private PostEnu catagories;

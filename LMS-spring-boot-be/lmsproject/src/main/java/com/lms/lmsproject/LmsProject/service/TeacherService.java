@@ -27,8 +27,6 @@ public class TeacherService {
     @Autowired
     private TeacherRepo teacherRepo;
 
-    private Teacher cachedTeacher;
-
     private static final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     @Autowired
@@ -61,15 +59,12 @@ public class TeacherService {
     }
 
     public Teacher getAuthenticatedTeacher() {
-        if (cachedTeacher == null) {
-            String username = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal())
-                    .getUsername();
-            cachedTeacher = teacherRepo.findByTeacherUsername(username).get();
-            if (cachedTeacher == null) {
-                throw new UsernameNotFoundException("User Not Found");
-            }
-        }
-        return cachedTeacher;
+
+        String username = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal())
+                .getUsername();
+
+        return teacherRepo.findByTeacherUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("Teacher not found !"));
     }
 
     public List<Teacher> fetchAllTeachers() {
@@ -102,7 +97,7 @@ public class TeacherService {
         }
 
         Teacher newTeacher = Teacher.builder()
-        .teacherId(UUID.randomUUID().toString())
+                .teacherId(UUID.randomUUID().toString())
                 .teacherUsername(reqTeacher.getTeacherUsername())
                 .teacherEmail(reqTeacher.getTeacherEmail())
                 .teacherPassword(passwordEncoder.encode(reqTeacher.getTeacherPassword())) // Avoid double setting
@@ -121,9 +116,9 @@ public class TeacherService {
         }
     }
 
+    @Transactional
     public Teacher updateTeacher(Teacher reqTeacher) {
 
-        // Get the current authenticated teacher
         Teacher exestingTeacher = getAuthenticatedTeacher();
 
         if (reqTeacher.getTeacherUsername() != null) {
@@ -141,13 +136,7 @@ public class TeacherService {
             exestingTeacher.setExpertise(reqTeacher.getExpertise());
         }
 
-        // Save the updated teacher
-        Teacher saveTeacher = teacherRepo.save(exestingTeacher);
-
-        // Invalidate the cached loggedInTeacher
-        cachedTeacher = null;
-
-        return saveTeacher;
+        return exestingTeacher;
     }
 
     public void deleteTeacher() {

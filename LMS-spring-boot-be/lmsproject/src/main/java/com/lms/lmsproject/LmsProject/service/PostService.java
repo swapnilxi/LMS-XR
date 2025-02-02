@@ -1,11 +1,14 @@
 package com.lms.lmsproject.LmsProject.service;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.lms.lmsproject.LmsProject.entity.Post;
 import com.lms.lmsproject.LmsProject.entity.PostEnu;
@@ -23,26 +26,20 @@ public class PostService {
     @Autowired
     private TeacherRepo teacherRepo;
 
-    private Teacher cachedTeacher;
-
     private Teacher getAuthenticatedTeacher() {
-        if (cachedTeacher == null) {
-            // Get the logged-in teacher's username
-            String username = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal())
-                    .getUsername();
-            // Fetch the teacher from the database
-            cachedTeacher = teacherRepo.findByTeacherUsername(username).get();
-            if (cachedTeacher == null) {
-                throw new RuntimeException("Teacher not found");
-            }
-        }
-        return cachedTeacher;
+
+        String username = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal())
+                .getUsername();
+
+        return teacherRepo.findByTeacherUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("Teacher not found !"));
     }
 
     public List<Post> fetchAllPost() {
         return postRepo.findAll();
     }
 
+    @Transactional
     public Post createPost(Post post) {
         // Validate title and content
         if (post.getTitle() == null || post.getTitle().trim().isEmpty()) {
@@ -53,6 +50,7 @@ public class PostService {
         }
         // Create a new Post
         Post newPost = Post.builder()
+                .postId(UUID.randomUUID().toString())
                 .title(post.getTitle())
                 .content(post.getContent())
                 .teacher(getAuthenticatedTeacher()) // Associate the post with the logged-in teacher
@@ -63,11 +61,12 @@ public class PostService {
         return postRepo.save(newPost);
     }
 
+    @Transactional
     public Post updatePost(Post post) {
+        Teacher authenticatedUser = getAuthenticatedTeacher();
         Post existingPost = postRepo.findById(post.getPostId())
                 .orElseThrow(() -> new IllegalArgumentException("Post not found"));
-    
-        Teacher authenticatedUser = getAuthenticatedTeacher(); 
+
         if (!existingPost.getTeacher().getTeacherId().equals(authenticatedUser.getTeacherId())) {
             throw new IllegalArgumentException("You are not authorized to update this post");
         }
@@ -77,10 +76,9 @@ public class PostService {
         if (post.getContent() != null) {
             existingPost.setContent(post.getContent());
         }
-    
+
         return postRepo.save(existingPost);
     }
-    
 
     public Post findPostById(String id) {
         return postRepo.findById(id)

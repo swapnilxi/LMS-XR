@@ -3,13 +3,13 @@ package com.lms.lmsproject.LmsProject.entity;
 import java.util.List;
 import java.util.Set;
 
-// import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
 import jakarta.annotation.Nonnull;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -37,7 +37,7 @@ public class Teacher {
     private String teacherPassword;
 
     @DBRef
-    private List<Post> posts; // Change List<Course> to List<Post>
+    private List<Post> posts;
 
     @Nonnull
     private String expertise; // Area of expertise, e.g., "Java", "Machine Learning"

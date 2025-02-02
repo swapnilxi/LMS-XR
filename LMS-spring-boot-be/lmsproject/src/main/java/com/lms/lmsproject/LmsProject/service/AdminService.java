@@ -84,7 +84,6 @@ public class AdminService {
             throw new IllegalArgumentException("Admin Password can Not be Null");
         }
 
-        // Check if the adminEmail is already registered
         Optional<Admin> existingAdminEmail = adminRepoService.findByAdminEmail(reqAdmin.getAdminEmail());
         Optional<Admin> existingAdminUserName = adminRepoService.findByAdminName(reqAdmin.getAdminName());
         if (existingAdminEmail.isPresent()) {
@@ -121,7 +120,6 @@ public class AdminService {
             throw new IllegalArgumentException("Authenticated Admin ID is null");
         }
 
-        // Update only fields that are not null in reqAdmin
         if (reqAdmin.getAdminEmail() != null) {
             authenticatedAdmin.setAdminEmail(reqAdmin.getAdminEmail());
         }
