@@ -3,6 +3,7 @@ package com.lms.lmsproject.LmsProject.filter;
 import java.io.IOException;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -39,7 +40,10 @@ public class JwtFilter extends OncePerRequestFilter {
         userName = jwtService.extractUsername(jwtToken);
         if (userName != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = this.userDetailsService.loadUserByUsername(userName);
+
+            
             if (jwtService.isTokenValid(jwtToken, userDetails)) {
+                
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                         userDetails,
                         null,
@@ -47,6 +51,10 @@ public class JwtFilter extends OncePerRequestFilter {
                 authToken.setDetails(
                         new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authToken);
+
+                Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+                System.out.println("Authenticated User: " + authentication.getName());
+                System.out.println("Authorities: " + authentication.getAuthorities());
             }
         }
         filterChain.doFilter(request, response);

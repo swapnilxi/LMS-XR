@@ -1,5 +1,6 @@
 package com.lms.lmsproject.LmsProject.service;
 
+import java.util.Arrays;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,21 +31,19 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        // Fetch user from the database
-        Optional<UserEnt> userOpt = userRepo.findByUserName(username);
-        if (userOpt.isPresent()) {
-            return buildUserDetails(userOpt.get());
+        Optional<Admin> adminOpt = adminRepo.findByAdminName(username);
+        if (adminOpt.isPresent()) {
+            return buildUserDetails(adminOpt.get());
         }
-
-        // If no user is found, try to find the teacher
+    
         Optional<Teacher> teacherOpt = teacherRepo.findByTeacherUsername(username);
         if (teacherOpt.isPresent()) {
             return buildUserDetails(teacherOpt.get());
         }
-
-        Optional<Admin> adminOpt = adminRepo.findByAdminName(username);
-        if (adminOpt.isPresent()) {
-            return buildUserDetails(adminOpt.get());
+    
+        Optional<UserEnt> userOpt = userRepo.findByUserName(username);
+        if (userOpt.isPresent()) {
+            return buildUserDetails(userOpt.get());
         }
 
         // If neither found, throw exception
@@ -80,6 +79,8 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                 .map(role -> role.name())
                 .toArray(String[]::new);
 
+        System.out
+                .println("Admin roles: !!!!!!!!!!!!!!!!!!!!_________________----------------" + Arrays.toString(roles));
         return User.builder()
                 .username(admin.getAdminName())
                 .password(admin.getAdminPassword())

@@ -17,7 +17,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.lms.lmsproject.LmsProject.customApiResponse.APIResponse;
 import com.lms.lmsproject.LmsProject.entity.Admin;
+import com.lms.lmsproject.LmsProject.entity.Teacher;
+import com.lms.lmsproject.LmsProject.entity.UserEnt;
 import com.lms.lmsproject.LmsProject.service.AdminService;
+import com.lms.lmsproject.LmsProject.service.TeacherService;
+import com.lms.lmsproject.LmsProject.service.UserEntService;
 
 @RestController
 @RequestMapping(path = "/admin")
@@ -25,6 +29,12 @@ public class AdminController {
 
     @Autowired
     private AdminService adminService;
+
+    @Autowired
+    private UserEntService userEntService;
+
+    @Autowired
+    private TeacherService teacherService;
 
     @GetMapping(path = "/all-admin")
     ResponseEntity<APIResponse<List<Admin>>> getAllAdmins() {
@@ -109,4 +119,85 @@ public class AdminController {
         }
     }
 
+    // User Controllers
+
+    @GetMapping(path = "/all-user")
+    public ResponseEntity<APIResponse<List<UserEnt>>> getAllUsers() {
+        try {
+            List<UserEnt> users = userEntService.getAllUsers();
+            return new ResponseEntity<>(new APIResponse<List<UserEnt>>(HttpStatus.OK.value(), "Success", users),
+                    HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(
+                    new APIResponse<List<UserEnt>>(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Error", null),
+                    HttpStatus.OK);
+        }
+    }
+
+    @DeleteMapping(path = "/delete-user-id/{id}")
+    public ResponseEntity<APIResponse<Void>> deleteUserByUserId(@PathVariable String id) {
+        try {
+            adminService.deleteUserById(id);
+            return new ResponseEntity<>(new APIResponse<>(HttpStatus.NO_CONTENT.value(), "Success", null),
+                    HttpStatus.OK);
+        } catch (Exception RuntimeException) {
+            return new ResponseEntity<>(
+                    new APIResponse<>(HttpStatus.NOT_FOUND.value(), RuntimeException.getMessage(), null),
+                    HttpStatus.OK);
+        }
+    }
+
+    @GetMapping(path = "/find-user-id/{id}")
+    public ResponseEntity<APIResponse<UserEnt>> findUserById(@PathVariable String id) {
+        try {
+            UserEnt user = adminService.findUserById(id);
+            return new ResponseEntity<>(new APIResponse<UserEnt>(HttpStatus.OK.value(), "Success", user),
+                    HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(
+                    new APIResponse<UserEnt>(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Error", null),
+                    HttpStatus.OK);
+        }
+    }
+
+    // Teacher Controllers
+
+    @GetMapping(path = "/all-teacher")
+    public ResponseEntity<APIResponse<List<Teacher>>> getAllTeachers() {
+        try {
+            List<Teacher> teachers = teacherService.fetchAllTeachers();
+            return new ResponseEntity<>(new APIResponse<List<Teacher>>(HttpStatus.OK.value(), "Success", teachers),
+                    HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(
+                    new APIResponse<List<Teacher>>(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Error", null),
+                    HttpStatus.OK);
+        }
+    }
+
+    @DeleteMapping(path = "/delete-teacher-id/{id}")
+    public ResponseEntity<APIResponse<Void>> deleteTeacherById(@PathVariable String id) {
+        try {
+            adminService.deleteTeacherById(id);
+            return new ResponseEntity<>(new APIResponse<>(HttpStatus.NO_CONTENT.value(), "Success", null),
+                    HttpStatus.OK);
+        } catch (Exception RuntimeException) {
+            return new ResponseEntity<>(
+                    new APIResponse<>(HttpStatus.NOT_FOUND.value(), RuntimeException.getMessage(), null),
+                    HttpStatus.OK);
+        }
+    }
+
+    @GetMapping(path = "/find-teacher-id/{id}")
+    public ResponseEntity<APIResponse<Teacher>> findTeacherById(@PathVariable String id) {
+        try {
+            Teacher teacher = adminService.findTeacherById(id);
+            return new ResponseEntity<>(new APIResponse<Teacher>(HttpStatus.OK.value(), "Success", teacher),
+                    HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(
+                    new APIResponse<Teacher>(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Error", null),
+                    HttpStatus.OK);
+        }
+    }
 }

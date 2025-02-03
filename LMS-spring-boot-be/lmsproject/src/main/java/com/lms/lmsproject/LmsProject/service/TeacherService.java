@@ -16,9 +16,13 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.lms.lmsproject.LmsProject.entity.Admin;
 import com.lms.lmsproject.LmsProject.entity.Role;
 import com.lms.lmsproject.LmsProject.entity.Teacher;
+import com.lms.lmsproject.LmsProject.entity.UserEnt;
+import com.lms.lmsproject.LmsProject.repository.AdminRepo;
 import com.lms.lmsproject.LmsProject.repository.TeacherRepo;
+import com.lms.lmsproject.LmsProject.repository.UserEntRepo;
 import com.lms.lmsproject.LmsProject.utils.JwtUtils;
 
 @Service
@@ -26,6 +30,12 @@ public class TeacherService {
 
     @Autowired
     private TeacherRepo teacherRepo;
+
+    @Autowired
+    private AdminRepo adminRepo;
+
+    @Autowired
+    private UserEntRepo userEntRepo;
 
     private static final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
@@ -89,11 +99,15 @@ public class TeacherService {
 
         Optional<Teacher> existingTeacherEmail = teacherRepo.findByTeacherEmail(reqTeacher.getTeacherEmail());
         Optional<Teacher> existingTeacherUserName = teacherRepo.findByTeacherUsername(reqTeacher.getTeacherUsername());
+        Optional<Admin> existingAdminUserName = adminRepo.findByAdminName(reqTeacher.getTeacherUsername());
+        Optional<UserEnt> exestingUserEntName = userEntRepo.findByUserName(reqTeacher.getTeacherUsername());
+
         if (existingTeacherEmail.isPresent()) {
             throw new IllegalArgumentException("Teacher with this email is already registered");
         }
-        if (existingTeacherUserName.isPresent()) {
-            throw new IllegalArgumentException("Teacher Username is already used");
+        if (existingTeacherUserName.isPresent() || existingAdminUserName.isPresent()
+                || exestingUserEntName.isPresent()) {
+            throw new IllegalArgumentException("Username is already used");
         }
 
         Teacher newTeacher = Teacher.builder()
