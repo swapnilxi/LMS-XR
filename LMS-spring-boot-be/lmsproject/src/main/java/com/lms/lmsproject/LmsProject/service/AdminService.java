@@ -18,7 +18,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.lms.lmsproject.LmsProject.entity.Admin;
 import com.lms.lmsproject.LmsProject.entity.Role;
+import com.lms.lmsproject.LmsProject.entity.Teacher;
+import com.lms.lmsproject.LmsProject.entity.UserEnt;
 import com.lms.lmsproject.LmsProject.repository.AdminRepo;
+import com.lms.lmsproject.LmsProject.repository.TeacherRepo;
+import com.lms.lmsproject.LmsProject.repository.UserEntRepo;
 import com.lms.lmsproject.LmsProject.utils.JwtUtils;
 
 @Service
@@ -34,6 +38,12 @@ public class AdminService {
 
     @Autowired
     private AuthenticationManager authenticationManager;
+
+    @Autowired
+    private UserEntRepo userEntRepo;
+
+    @Autowired
+    private TeacherRepo teacherRepo;
 
     @Autowired
     private JwtUtils jwtUtils;
@@ -83,13 +93,14 @@ public class AdminService {
         if (reqAdmin.getAdminPassword() == null || reqAdmin.getAdminPassword().trim().isEmpty()) {
             throw new IllegalArgumentException("Admin Password can Not be Null");
         }
-
         Optional<Admin> existingAdminEmail = adminRepoService.findByAdminEmail(reqAdmin.getAdminEmail());
         Optional<Admin> existingAdminUserName = adminRepoService.findByAdminName(reqAdmin.getAdminName());
+        Optional<Teacher> exestingTeacherName = teacherRepo.findByTeacherUsername(reqAdmin.getAdminName());
+        Optional<UserEnt> exestingUserEntName = userEntRepo.findByUserName(reqAdmin.getAdminName());
         if (existingAdminEmail.isPresent()) {
             throw new IllegalArgumentException("Admin with this email is already registered");
         }
-        if (existingAdminUserName.isPresent()) {
+        if (existingAdminUserName.isPresent() || exestingTeacherName.isPresent() || exestingUserEntName.isPresent()) {
             throw new IllegalArgumentException("Admin Username is already used");
         }
 
@@ -139,7 +150,7 @@ public class AdminService {
                 .orElseThrow(() -> new UsernameNotFoundException("Admin Not Found !"));
 
         if (!admin.getAdminId().equals(getAuthenticatedAdmin().getAdminId())) {
-        throw new IllegalArgumentException("You are not authorized to delete this Admin");
+            throw new IllegalArgumentException("You are not authorized to delete this Admin");
         }
         adminRepoService.delete(admin);
     }
@@ -154,6 +165,32 @@ public class AdminService {
         }
 
         return admin.getAdminId();
+    }
+
+    // USER service
+
+    public void deleteUserById(String id) {
+        UserEnt user = userEntRepo.findById(id)
+                .orElseThrow(() -> new UsernameNotFoundException("User id not found !"));
+        userEntRepo.delete(user);
+    }
+
+    public UserEnt findUserById(String id) {
+        return userEntRepo.findById(id)
+                .orElseThrow(() -> new UsernameNotFoundException("User id not found !"));
+    }
+
+    // Teacher service
+
+    public void deleteTeacherById(String id) {
+        Teacher teacher = teacherRepo.findById(id)
+                .orElseThrow(() -> new UsernameNotFoundException("User id not found !"));
+        teacherRepo.delete(teacher);
+    }
+
+    public Teacher findTeacherById(String id) {
+        return teacherRepo.findById(id)
+                .orElseThrow(() -> new UsernameNotFoundException("Teacher id not found"));
     }
 
 }

@@ -27,7 +27,7 @@ public class Course {
     @Nonnull
     private String courseTitle;
 
-      @Field("courseDescription")
+    @Field("courseDescription")
     @Nonnull
     private String courseDescription;
 

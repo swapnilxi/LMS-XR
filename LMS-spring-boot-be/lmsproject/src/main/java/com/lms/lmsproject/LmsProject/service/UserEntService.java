@@ -16,8 +16,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.lms.lmsproject.LmsProject.entity.Admin;
 import com.lms.lmsproject.LmsProject.entity.Role;
+import com.lms.lmsproject.LmsProject.entity.Teacher;
 import com.lms.lmsproject.LmsProject.entity.UserEnt;
+import com.lms.lmsproject.LmsProject.repository.AdminRepo;
+import com.lms.lmsproject.LmsProject.repository.TeacherRepo;
 import com.lms.lmsproject.LmsProject.repository.UserEntRepo;
 import com.lms.lmsproject.LmsProject.utils.JwtUtils;
 
@@ -26,6 +30,12 @@ public class UserEntService {
 
     @Autowired
     private UserEntRepo userEntRepo;
+
+    @Autowired
+    private TeacherRepo teacherRepo;
+
+    @Autowired
+    private AdminRepo adminRepo;
 
     @Autowired
     private UserDetailsServiceImpl userDetailsServiceImpl;
@@ -97,10 +107,12 @@ public class UserEntService {
 
         Optional<UserEnt> existingUserEmail = userEntRepo.findByUserEmail(requestUser.getUserEmail());
         Optional<UserEnt> existingUserName = userEntRepo.findByUserName(requestUser.getUserName());
+        Optional<Teacher> existingTeacherUserName = teacherRepo.findByTeacherUsername(requestUser.getUserName());
+Optional<Admin> existingAdminUserName = adminRepo.findByAdminName(requestUser.getUserName());
         if (existingUserEmail.isPresent()) {
             throw new IllegalArgumentException("User with this email is already registered");
         }
-        if (existingUserName.isPresent()) {
+        if (existingUserName.isPresent() || existingTeacherUserName.isPresent() || existingAdminUserName.isPresent()) {
             throw new IllegalArgumentException("Username is already used");
         }
 

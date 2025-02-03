@@ -30,14 +30,17 @@ public class JwtUtils {
         return claimsResolver.apply(claims);
     }
 
-    public String generateToken(UserDetails userDetails){
-        return generateToken(new HashMap<>(), userDetails);
+    public String generateToken(UserDetails userDetails) {
+        Map<String, Object> claims = new HashMap<>();
+        return generateToken(claims, userDetails);
     }
+    
 
     public String generateToken(
         Map<String, Object> extraClaims,
         UserDetails userDetails
     ){
+      
         return Jwts.builder()
         .setClaims(extraClaims)
         .setSubject(userDetails.getUsername())
@@ -60,7 +63,7 @@ public class JwtUtils {
     return extractClaim(token, Claims::getExpiration);
 }
 
-private Claims extractAllClaims(String token){
+public Claims extractAllClaims(String token){
         return Jwts
         .parserBuilder()
         .setSigningKey(getSignInKey())
